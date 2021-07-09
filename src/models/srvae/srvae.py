@@ -207,11 +207,11 @@ class srVAE(nn.Module):
         z_p_mean, z_p_logvar = outputs.get('z_p_mean'), outputs.get('z_p_logvar')
 
         # When calculating the bits per dimension, we need to use the discretized likelihood
-        RE_x = -self.discrete_recon_loss(self.robust_loss_x.lossfun, x, x_hat).sum(1).mean()
-        RE_y = -self.discrete_recon_loss(self.robust_loss_y.lossfun, y, y_hat).sum(1).mean()
+        #RE_x = -self.discrete_recon_loss(self.robust_loss_x.lossfun, x, x_hat).sum(1).mean()
+        #RE_y = -self.discrete_recon_loss(self.robust_loss_y.lossfun, y, y_hat).sum(1).mean()
 
-        #RE_x = self.robust_loss_x.lossfun((x-x_hat).reshape(x.shape[0], -1)).mean()
-        #RE_y = self.robust_loss_y.lossfun((y-y_hat).reshape(x.shape[0], -1)).mean()
+        RE_x = self.robust_loss_x.lossfun((x-x_hat).reshape(x.shape[0], -1)).mean()
+        RE_y = self.robust_loss_y.lossfun((y-y_hat).reshape(x.shape[0], -1)).mean()
 
         # Regularization loss
         log_p_u = self.p_u.log_p(u_q, dim=1)
@@ -224,7 +224,7 @@ class srVAE(nn.Module):
 
         consistency_loss = self.mse_loss(y_hat, F.interpolate(x_hat, size=[self.y_shape[1], self.y_shape[2]], align_corners=False, mode='bilinear'))
         # Total lower bound loss
-        nelbo = RE_x + RE_y + 1*KL_u + 1*KL_z# + 5*consistency_loss
+        nelbo = RE_x + RE_y + 5e-3*KL_u + 2e-4*KL_z + 5*consistency_loss
 
         diagnostics = {
             "bpd"   : (nelbo.item()) / (np.prod(x.shape[1:]) * np.log(2.)),
