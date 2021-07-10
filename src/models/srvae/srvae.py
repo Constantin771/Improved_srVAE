@@ -194,7 +194,7 @@ class srVAE(nn.Module):
             sample += step_size_edge
 
         final_discrete_prob = bin_prob_normal*mask_lower.logical_not() + bin_prob_low_edge*mask_lower
-        final_discrete_prob = bin_prob_normal*mask_upper.logical_not() + bin_prob_high_edge*mask_upper
+        final_discrete_prob = final_discrete_prob*mask_upper.logical_not() + bin_prob_high_edge*mask_upper
 
         return torch.log(final_discrete_prob)
 
